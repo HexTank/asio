@@ -382,6 +382,7 @@ sub copy_include_files
       "include/asio/ssl/impl",
       "include/asio/ssl/old",
       "include/asio/ssl/old/detail",
+      "include/asio/ts",
       "include/asio/windows");
 
   foreach my $dir (@dirs)
@@ -429,6 +430,7 @@ sub copy_unit_tests
       "src/tests/unit/local",
       "src/tests/unit/posix",
       "src/tests/unit/ssl",
+      "src/tests/unit/ts",
       "src/tests/unit/windows");
 
   our $boost_dir;
@@ -516,9 +518,15 @@ sub copy_examples
       "src/examples/cpp11/chat",
       "src/examples/cpp11/echo",
       "src/examples/cpp11/executors",
+      "src/examples/cpp11/fork",
       "src/examples/cpp11/futures",
+      "src/examples/cpp11/handler_tracking",
       "src/examples/cpp11/http/server",
+      "src/examples/cpp11/invocation",
       "src/examples/cpp11/iostreams",
+      "src/examples/cpp11/local",
+      "src/examples/cpp11/multicast",
+      "src/examples/cpp11/nonblocking",
       "src/examples/cpp11/spawn",
       "src/examples/cpp14/executors");
 
