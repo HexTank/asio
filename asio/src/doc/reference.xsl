@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
 <!--
-  Copyright (c) 2003-2017 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+  Copyright (c) 2003-2018 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 
   Distributed under the Boost Software License, Version 1.0. (See accompanying
   file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -26,7 +26,7 @@
 -->
 <xsl:template match="/doxygen">
 <xsl:text>[/
- / Copyright (c) 2003-2017 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+ / Copyright (c) 2003-2018 Christopher M. Kohlhoff (chris at kohlhoff dot com)
  /
  / Distributed under the Boost Software License, Version 1.0. (See accompanying
  / file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -65,6 +65,7 @@
 [include requirements/IoControlCommand.qbk]
 [include requirements/IoObjectService.qbk]
 [include requirements/IteratorConnectHandler.qbk]
+[include requirements/LegacyCompletionHandler.qbk]
 [include requirements/MoveAcceptHandler.qbk]
 [include requirements/MutableBufferSequence.qbk]
 [include requirements/ProtoAllocator.qbk]
@@ -100,6 +101,7 @@
             not(contains(compoundname, '::detail')) and
             not(contains(compoundname, '::service::key')) and
             not(contains(compoundname, '_handler')) and
+            not(contains(compoundname, 'std_allocator_void')) and
             not(contains(compoundname, 'thread_function')) and
             not(contains(compoundname, 'context_impl'))">
           <xsl:call-template name="class"/>
@@ -111,6 +113,7 @@
             not(contains(ancestor::*/compoundname, '::service::key')) and
             not(contains(ancestor::*/compoundname, '_helper')) and
             not(contains(name, '_helper')) and
+            not(contains(name, 'std_allocator_void')) and
             not(contains(name, 'thread_function')) and
             not(contains(name, 'io_context_impl'))">
           <xsl:call-template name="namespace-memberdef"/>
@@ -765,6 +768,9 @@
     <xsl:when test="contains($file, 'include/asio/ssl')">
       <xsl:text>[^asio/ssl.hpp]</xsl:text>
     </xsl:when>
+    <xsl:when test="contains($file, 'include/asio/experimental')">
+      <xsl:text>[^asio/experimental.hpp]</xsl:text>
+    </xsl:when>
     <xsl:when test="contains($file, 'include/asio/spawn')">
       <xsl:text>None</xsl:text>
     </xsl:when>
@@ -920,6 +926,7 @@
   </xsl:if>
   <xsl:if test="not($overload-position = 1) and not(briefdescription = preceding-sibling::*/briefdescription)">
     <xsl:value-of select="$newline"/>
+    <xsl:text>     [hr]</xsl:text>
     <xsl:value-of select="$newline"/>
     <xsl:text>     </xsl:text>
     <xsl:value-of select="briefdescription"/>
@@ -968,6 +975,7 @@
   </xsl:if>
   <xsl:if test="not($overload-position = 1) and not(briefdescription = preceding-sibling::*/briefdescription)">
     <xsl:value-of select="$newline"/>
+    <xsl:text>     [hr]</xsl:text>
     <xsl:value-of select="$newline"/>
     <xsl:text>     </xsl:text>
     <xsl:value-of select="briefdescription"/>
@@ -1017,6 +1025,7 @@
   </xsl:if>
   <xsl:if test="not($overload-position = 1) and not(briefdescription = preceding-sibling::*/briefdescription)">
     <xsl:value-of select="$newline"/>
+    <xsl:text>     [hr]</xsl:text>
     <xsl:value-of select="$newline"/>
     <xsl:text>     </xsl:text>
     <xsl:value-of select="briefdescription"/>
@@ -1096,6 +1105,7 @@
   </xsl:if>
   <xsl:if test="not($overload-position = 1) and not(briefdescription = preceding-sibling::*/briefdescription)">
     <xsl:value-of select="$newline"/>
+    <xsl:text>     [hr]</xsl:text>
     <xsl:value-of select="$newline"/>
     <xsl:text>     </xsl:text>
     <xsl:value-of select="briefdescription"/>
@@ -1348,9 +1358,25 @@
 </xsl:text>
 <xsl:if test="count(type/ref) &gt; 0 and not(contains(type, '*'))">
   <xsl:variable name="class-refid">
-    <xsl:for-each select="type/ref[1]">
-      <xsl:value-of select="@refid"/>
-    </xsl:for-each>
+    <xsl:choose>
+      <xsl:when test="type='basic_address_iterator&lt; address_v4 &gt;'">
+        <xsl:text>classasio_1_1ip_1_1basic__address__iterator_3_01address__v4_01_4</xsl:text>
+      </xsl:when>
+      <xsl:when test="type='basic_address_iterator&lt; address_v6 &gt;'">
+        <xsl:text>classasio_1_1ip_1_1basic__address__iterator_3_01address__v6_01_4</xsl:text>
+      </xsl:when>
+      <xsl:when test="type='basic_address_range&lt; address_v4 &gt;'">
+        <xsl:text>classasio_1_1ip_1_1basic__address__range_3_01address__v4_01_4</xsl:text>
+      </xsl:when>
+      <xsl:when test="type='basic_address_range&lt; address_v6 &gt;'">
+        <xsl:text>classasio_1_1ip_1_1basic__address__range_3_01address__v6_01_4</xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:for-each select="type/ref[1]">
+          <xsl:value-of select="@refid"/>
+        </xsl:for-each>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:variable>
   <xsl:variable name="name" select="name"/>
   <xsl:for-each select="/doxygen/compounddef[@id=$class-refid]">
@@ -1498,6 +1524,9 @@
         </xsl:when>
         <xsl:when test="declname = 'Executor'">
           <xsl:value-of select="concat('``[link asio.reference.Executor1 ', declname, ']``')"/>
+        </xsl:when>
+        <xsl:when test="declname = 'F'">
+          <xsl:value-of select="declname"/>
         </xsl:when>
         <xsl:when test="declname = 'Function'">
           <xsl:value-of select="declname"/>
@@ -1667,18 +1696,10 @@
 <xsl:value-of select="$name"/>
 <xsl:text>] </xsl:text>
 
-<xsl:choose>
-  <xsl:when test="count(/doxygen/compounddef[@kind='group' and compoundname=$name]) &gt; 0">
-    <xsl:for-each select="/doxygen/compounddef[@kind='group' and compoundname=$name]">
-      <xsl:apply-templates select="briefdescription" mode="markup"/><xsl:text>
-      </xsl:text>
-    </xsl:for-each>
-  </xsl:when>
-  <xsl:otherwise>
-    <xsl:apply-templates select="briefdescription" mode="markup"/><xsl:text>
-    </xsl:text>
-  </xsl:otherwise>
-</xsl:choose>
+<xsl:for-each select="/doxygen/compounddef[@kind='group' and compoundname=$name]">
+  <xsl:apply-templates select="briefdescription" mode="markup"/>
+  <xsl:value-of select="$newline"/>
+</xsl:for-each>
 
 <xsl:for-each select="../memberdef[name = $unqualified-name]">
 <xsl:variable name="stripped-type">
@@ -1686,6 +1707,9 @@
    <xsl:with-param name="name" select="type"/>
  </xsl:call-template>
 </xsl:variable>
+<xsl:if test="position() = 1 or not(briefdescription = preceding-sibling::memberdef[1]/briefdescription)">
+  <xsl:apply-templates select="briefdescription" mode="markup"/>
+</xsl:if>
 <xsl:text>
 </xsl:text><xsl:apply-templates select="templateparamlist" mode="class-detail"/>
 <xsl:text>  </xsl:text><xsl:if test="string-length($stripped-type) &gt; 0"><xsl:value-of
